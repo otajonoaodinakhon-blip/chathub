@@ -1,179 +1,221 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatHub</title>
-    <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatHub - Modern Telegram</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="chat-container">
-        <!-- ======================================== -->
-        <!-- HEADER -->
-        <!-- ======================================== -->
-        <header class="chat-header">
-            <div class="header-left">
-                <span class="brand">💬 ChatHub</span>
-                <span class="room-badge"># <span id="currentRoomName">general</span></span>
-            </div>
-            <div class="header-right">
-                <button class="icon-btn">👤</button>
-                <button class="icon-btn logout">🚪</button>
-            </div>
-        </header>
 
-        <!-- ======================================== -->
-        <!-- MAIN -->
-        <!-- ======================================== -->
-        <div class="chat-main">
-            <!-- SIDEBAR -->
-            <aside class="sidebar">
-                <!-- User Profile -->
-                <div class="user-profile">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-info">
-                        <div class="user-name">temuriy</div>
-                        <div class="user-status">
-                            <span class="status-dot"></span> Online
-                        </div>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- Room List -->
-                <div class="room-list">
-                    <div class="room-list-header">
-                        <span>Xonalar</span>
-                        <span class="room-count">3</span>
-                    </div>
-
-                    <button class="room-item active" data-room="general">
-                        <span class="room-icon">#</span>
-                        <span class="room-name">general</span>
-                        <span class="room-badge">12</span>
-                    </button>
-
-                    <button class="room-item" data-room="random">
-                        <span class="room-icon">🎲</span>
-                        <span class="room-name">random</span>
-                        <span class="room-badge">5</span>
-                    </button>
-
-                    <button class="room-item" data-room="help">
-                        <span class="room-icon">❓</span>
-                        <span class="room-name">help</span>
-                        <span class="room-badge">3</span>
-                    </button>
-                </div>
-            </aside>
-
-            <!-- MESSAGES -->
-            <main class="messages-area">
-                <div class="messages-container">
-                    <!-- Xabarlar -->
-                    <div class="message other">
-                        <div class="msg-avatar">G</div>
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">gay</span>
-                                <span class="msg-time">19:24:18</span>
-                            </div>
-                            <div class="msg-text">gay</div>
-                        </div>
-                    </div>
-
-                    <div class="message own">
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">Siz</span>
-                                <span class="msg-time">19:24:42</span>
-                            </div>
-                            <div class="msg-text">hi</div>
-                        </div>
-                    </div>
-
-                    <div class="message own">
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">Siz</span>
-                                <span class="msg-time">19:27:27</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-
-                    <div class="message other">
-                        <div class="msg-avatar">G</div>
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">gay</span>
-                                <span class="msg-time">19:35:27</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-
-                    <div class="message own">
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">Siz</span>
-                                <span class="msg-time">19:45:35</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-
-                    <div class="message other">
-                        <div class="msg-avatar">G</div>
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">gay</span>
-                                <span class="msg-time">19:49:10</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-
-                    <div class="message own">
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">Siz</span>
-                                <span class="msg-time">20:35:28</span>
-                            </div>
-                            <div class="msg-text">ggwp</div>
-                        </div>
-                    </div>
-
-                    <div class="message other">
-                        <div class="msg-avatar">G</div>
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">gay</span>
-                                <span class="msg-time">20:37:08</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-
-                    <div class="message own">
-                        <div class="msg-content">
-                            <div class="msg-meta">
-                                <span class="msg-name">Siz</span>
-                                <span class="msg-time">20:37:46</span>
-                            </div>
-                            <div class="msg-text">salom</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- INPUT -->
-                <div class="chat-input">
-                    <input type="text" placeholder="Xabar yozing...">
-                    <button class="send-btn">➤</button>
-                </div>
-            </main>
-        </div>
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="screen">
+    <div class="auth-card">
+      <h2>ChatHub</h2>
+      <div id="auth-error" class="error-msg"></div>
+      <input type="text" id="username" placeholder="Username">
+      <input type="text" id="display-name" placeholder="Ismingiz (Faqat Registratsiya uchun)">
+      <input type="password" id="password" placeholder="Parol">
+      <div class="auth-buttons">
+        <button id="login-btn">Kirish</button>
+        <button id="register-btn" class="sec-btn">Ro'yxatdan o'tish</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Main Chat Screen -->
+  <div id="chat-screen" class="screen hidden">
+    <div class="app-container">
+      
+      <!-- Sidebar (Chats List) -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h1>Chats</h1>
+          <button class="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <div class="chat-tabs">
+          <span class="active">All</span>
+          <span>Personal</span>
+          <span>Favorites</span>
+        </div>
+        <div class="users-list" id="users-list">
+          <!-- Dinamik userlar keladi -->
+        </div>
+        
+        <!-- Bottom Modern Navigation Bar -->
+        <div class="bottom-nav">
+          <button><i class="fa-solid fa-phone"></i></button>
+          <button><i class="fa-solid fa-user"></i></button>
+          <div class="action-btn-wrapper">
+            <button class="floating-action-btn"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <button class="active"><i class="fa-solid fa-comment-dots"></i></button>
+          <button id="logout-btn"><i class="fa-solid fa-gear"></i></button>
+        </div>
+      </aside>
+
+      <!-- Chat Window -->
+      <main class="chat-window hidden" id="chat-window">
+        <div class="chat-header">
+          <button class="back-btn" id="back-to-sidebar"><i class="fa-solid fa-chevron-left"></i></button>
+          <img id="active-user-avatar" src="" alt="Avatar">
+          <div class="chat-user-info">
+            <h3 id="active-user-name">Kathryn Simmons</h3>
+            <span id="active-user-status">typing...</span>
+          </div>
+          <button class="more-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+
+        <div class="messages-container" id="messages-container">
+          <!-- Xabarlar shu yerga tushadi -->
+        </div>
+
+        <div class="chat-footer">
+          <button class="attach-btn"><i class="fa-solid fa-plus"></i></button>
+          <input type="text" id="message-input" placeholder="Message...">
+          <button class="emoji-btn"><i class="fa-regular fa-face-smile"></i></button>
+          <button class="send-btn" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Front-end JavaScript mantiqi
+    let socket;
+    let currentUser = null;
+    let activeChatUser = null;
+    const privateMessages = {}; // Local xabarlar saqlagich (baza o'rniga faqat sahifada turadi)
+
+    // Elementlarni olish
+    const authScreen = document.getElementById('auth-screen');
+    const chatScreen = document.getElementById('chat-screen');
+    const usersList = document.getElementById('users-list');
+    const chatWindow = document.getElementById('chat-window');
+    const messagesContainer = document.getElementById('messages-container');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const sidebar = document.getElementById('sidebar');
+
+    // Kirish va Ro'yxatdan o'tish mantiqi
+    document.getElementById('login-btn').addEventListener('click', () => handleAuth('/api/login'));
+    document.getElementById('register-btn').addEventListener('click', () => handleAuth('/api/register'));
+
+    async function handleAuth(url) {
+      const username = document.getElementById('username').value;
+      const display_name = document.getElementById('display-name').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ username, password, displayName: display_name })
+      });
+      const data = await res.json();
+      if(data.error) {
+        document.getElementById('auth-error').innerText = data.error;
+      } else {
+        localStorage.setItem('token', data.token);
+        currentUser = data.user;
+        startChat();
+      }
+    }
+
+    function startChat() {
+      authScreen.classList.add('hidden');
+      chatScreen.classList.remove('hidden');
+      
+      socket = io();
+      socket.emit('authenticate', localStorage.getItem('token'));
+
+      loadUsers();
+
+      socket.on('msg_receive', (data) => {
+        if(!privateMessages[data.from]) privateMessages[data.from] = [];
+        privateMessages[data.from].push(data);
+        if(activeChatUser === data.from) renderMessages();
+        loadUsers(); // oxirgi xabarni yangilash uchun
+      });
+
+      socket.on('msg_sent_confirm', (data) => {
+        if(!privateMessages[data.to]) privateMessages[data.to] = [];
+        privateMessages[data.to].push(data);
+        if(activeChatUser === data.to) renderMessages();
+      });
+    }
+
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const users = await res.json();
+      usersList.innerHTML = '';
+      users.forEach(u => {
+        if(u.username === currentUser.username) return;
+        const lastMsgs = privateMessages[u.username] || [];
+        const lastMsg = lastMsgs[lastMsgs.length - 1]?.message || 'No messages yet';
+        
+        const div = document.createElement('div');
+        div.className = `user-item ${activeChatUser === u.username ? 'active' : ''}`;
+        div.innerHTML = `
+          <img src="${u.avatar_url}">
+          <div class="user-item-info">
+            <h4>${u.display_name || u.username}</h4>
+            <p>${lastMsg}</p>
+          </div>
+        `;
+        div.onclick = () => openChat(u);
+        usersList.appendChild(div);
+      });
+    }
+
+    function openChat(user) {
+      activeChatUser = user.username;
+      chatWindow.classList.remove('hidden');
+      document.getElementById('active-user-avatar').src = user.avatar_url;
+      document.getElementById('active-user-name').innerText = user.display_name || user.username;
+      document.getElementById('active-user-status').innerText = 'online';
+      
+      // Mobil versiyada yon panelni yopish
+      if(window.innerWidth <= 768) {
+        sidebar.classList.add('mobile-hidden');
+      }
+
+      renderMessages();
+    }
+
+    function renderMessages() {
+      messagesContainer.innerHTML = '';
+      const msgs = privateMessages[activeChatUser] || [];
+      msgs.forEach(m => {
+        const div = document.createElement('div');
+        div.className = `message ${m.from === currentUser.username ? 'sent' : 'received'}`;
+        div.innerHTML = `
+          <div class="bubble">${m.message}</div>
+          <span class="time">${m.time}</span>
+        `;
+        messagesContainer.appendChild(div);
+      });
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    sendBtn.onclick = () => {
+      const text = messageInput.value.trim();
+      if(!text || !activeChatUser) return;
+      socket.emit('private_message', { to: activeChatUser, message: text });
+      messageInput.value = '';
+    };
+
+    document.getElementById('back-to-sidebar').onclick = () => {
+      sidebar.classList.remove('mobile-hidden');
+      chatWindow.classList.add('hidden');
+    };
+
+    document.getElementById('logout-btn').onclick = () => {
+      localStorage.clear();
+      location.reload();
+    };
+  </script>
 </body>
 </html>
