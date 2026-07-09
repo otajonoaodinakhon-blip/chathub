@@ -154,7 +154,7 @@ app.get('/api/messages/:room', verifyToken, async (req, res) => {
 });
 
 // ============================================
-// SOCKET.IO
+// SOCKET.IO - TUZATILGAN
 // ============================================
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -171,30 +171,65 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log(`👤 ${socket.username} connected`);
+    console.log(`👤 ${socket.username} connected, Socket ID: ${socket.id}`);
 
+    // Xonaga qo'shilish
     socket.on('join_room', (room) => {
-        socket.join(room || 'general');
+        const roomName = room || 'general';
+        socket.join(roomName);
+        console.log(`📡 ${socket.username} joined room: ${roomName}`);
+        
+        // Xush kelibsiz xabari
+        socket.emit('system_message', {
+            text: `💬 Xush kelibsiz, ${socket.username}!`,
+            time: new Date().toLocaleTimeString()
+        });
     });
 
+    // Xabar yuborish - TUZATILGAN
     socket.on('send_message', async (data) => {
         try {
             const { room, message } = data;
+            const roomName = room || 'general';
             
-            await db.saveMessage(room, socket.userId, message);
-            
-            io.to(room || 'general').emit('new_message', {
+            console.log(`📩 ${socket.username} -> ${roomName}: ${message}`);
+
+            // Bazaga saqlash
+            await db.saveMessage(roomName, socket.userId, message);
+
+            // Xabar ma'lumotlari
+            const messageData = {
                 id: Date.now(),
                 userId: socket.userId,
                 username: socket.username,
+                name: socket.username,
                 message: message,
-                created_at: new Date().toISOString()
-            });
+                created_at: new Date().toISOString(),
+                time: new Date().toLocaleTimeString()
+            };
+
+            // Xonadagi HAMMAGA yuborish (o'zi + boshqalar)
+            io.to(roomName).emit('new_message', messageData);
+            
+            // Debug uchun
+            console.log(`✅ Message sent to room: ${roomName}`);
+
         } catch (error) {
             console.error('Message error:', error);
+            socket.emit('error_message', { 
+                text: 'Xabar jo\'natishda xatolik: ' + error.message 
+            });
         }
     });
 
+    // Xonadan chiqish
+    socket.on('leave_room', (room) => {
+        const roomName = room || 'general';
+        socket.leave(roomName);
+        console.log(`👋 ${socket.username} left room: ${roomName}`);
+    });
+
+    // Uzilish
     socket.on('disconnect', () => {
         console.log(`👋 ${socket.username} disconnected`);
     });
@@ -206,4 +241,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 Socket.IO ready`);
 });
