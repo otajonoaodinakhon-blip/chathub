@@ -3,119 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatHub</title>
+    <title>ChatHub — Zamonaviy chat</title>
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- AUTH -->
-    <div id="authSection" class="container">
-        <div class="box">
-            <h1>💬 ChatHub</h1>
-            <p class="subtitle">Xush kelibsiz!</p>
+    <!-- ============================================
+    AUTH SECTION - ZAMONAVIY
+    ============================================ -->
+    <div id="authSection" class="auth-wrapper">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-brand">
+                    <div class="brand-icon">💬</div>
+                    <h1>ChatHub</h1>
+                    <p class="brand-sub">Zamonaviy real-time chat</p>
+                </div>
 
-            <div class="tabs">
-                <button id="loginTab" class="active">Kirish</button>
-                <button id="registerTab">Ro'yxatdan o'tish</button>
+                <div class="auth-tabs">
+                    <button id="loginTab" class="tab-btn active">Kirish</button>
+                    <button id="registerTab" class="tab-btn">Ro'yxat</button>
+                    <div class="tab-slider"></div>
+                </div>
+
+                <!-- Login -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="input-group">
+                        <div class="input-icon">👤</div>
+                        <input type="text" id="loginUsername" placeholder="Foydalanuvchi nomi" required>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">🔑</div>
+                        <input type="password" id="loginPassword" placeholder="Parol" required>
+                    </div>
+                    <button type="submit" class="auth-btn">
+                        <span>Kirish</span>
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </button>
+                </form>
+
+                <!-- Register -->
+                <form id="registerForm" class="auth-form">
+                    <div class="input-group">
+                        <div class="input-icon">👤</div>
+                        <input type="text" id="regUsername" placeholder="Foydalanuvchi nomi" required>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">📛</div>
+                        <input type="text" id="regName" placeholder="Ismingiz">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">📝</div>
+                        <input type="text" id="regBio" placeholder="Bio (ixtiyoriy)">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">🔑</div>
+                        <input type="password" id="regPassword" placeholder="Parol (4+ belgi)" required>
+                    </div>
+                    <button type="submit" class="auth-btn">
+                        <span>Ro'yxatdan o'tish</span>
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </button>
+                </form>
+
+                <div id="authMessage" class="auth-message"></div>
             </div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>👤 Username</label>
-                    <input type="text" id="loginUsername" placeholder="username" required>
-                </div>
-                <div class="form-group">
-                    <label>🔑 Password</label>
-                    <input type="password" id="loginPassword" placeholder="password" required>
-                </div>
-                <button type="submit" class="btn">Kirish</button>
-            </form>
-
-            <form id="registerForm" class="hidden">
-                <div class="form-group">
-                    <label>👤 Username</label>
-                    <input type="text" id="regUsername" placeholder="username" required>
-                </div>
-                <div class="form-group">
-                    <label>📛 Name</label>
-                    <input type="text" id="regName" placeholder="Ismingiz">
-                </div>
-                <div class="form-group">
-                    <label>📝 Bio</label>
-                    <input type="text" id="regBio" placeholder="O'zingiz haqingizda">
-                </div>
-                <div class="form-group">
-                    <label>🔑 Password</label>
-                    <input type="password" id="regPassword" placeholder="password" required>
-                </div>
-                <button type="submit" class="btn">Ro'yxatdan o'tish</button>
-            </form>
-
-            <div id="authMessage" class="message"></div>
         </div>
     </div>
 
-    <!-- CHAT -->
-    <div id="chatSection" class="hidden">
+    <!-- ============================================
+    CHAT SECTION - ZAMONAVIY
+    ============================================ -->
+    <div id="chatSection" style="display:none;" class="chat-wrapper">
         <div class="chat-container">
-            <header class="chat-header">
-                <h2>💬 ChatHub</h2>
-                <div class="header-actions">
-                    <button id="profileBtn" class="icon-btn">👤</button>
-                    <button id="logoutBtn" class="icon-btn">🚪</button>
-                </div>
-            </header>
-
-            <div class="chat-main">
-                <aside class="sidebar">
-                    <div class="user-info">
-                        <span id="chatUsername">@user</span>
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="header-left">
+                    <div class="header-brand">
+                        <span class="brand-dot">💬</span>
+                        <h2>ChatHub</h2>
                     </div>
+                    <div class="room-indicator">
+                        <span class="room-hash">#</span>
+                        <span id="currentRoomName" class="room-name">general</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="profileBtn" class="header-btn" title="Profil">
+                        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </button>
+                    <button id="logoutBtn" class="header-btn logout-btn" title="Chiqish">
+                        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Main -->
+            <div class="chat-main">
+                <!-- Sidebar -->
+                <aside class="chat-sidebar">
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">👤</div>
+                        <div class="user-details">
+                            <div class="user-name" id="chatUsername">User</div>
+                            <div class="user-status">
+                                <span class="status-dot online"></span>
+                                Online
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
                     <div class="room-list">
-                        <button class="room-btn active" data-room="general"># general</button>
-                        <button class="room-btn" data-room="random"># random</button>
-                        <button class="room-btn" data-room="help"># help</button>
+                        <div class="room-list-header">
+                            <span>Xonalar</span>
+                            <span class="room-count">3</span>
+                        </div>
+                        <button class="room-item active" data-room="general">
+                            <span class="room-icon">#</span>
+                            <span class="room-name">general</span>
+                            <span class="room-badge">12</span>
+                        </button>
+                        <button class="room-item" data-room="random">
+                            <span class="room-icon">🎲</span>
+                            <span class="room-name">random</span>
+                            <span class="room-badge">5</span>
+                        </button>
+                        <button class="room-item" data-room="help">
+                            <span class="room-icon">❓</span>
+                            <span class="room-name">help</span>
+                            <span class="room-badge">3</span>
+                        </button>
                     </div>
                 </aside>
 
-                <main class="chat-area">
-                    <div class="chat-messages" id="messagesContainer">
-                        <!-- Xabarlar shu yerga qo'shiladi -->
+                <!-- Messages -->
+                <main class="chat-messages-area">
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="message-center">
+                            <div class="message-center-icon">💬</div>
+                            <p>Xabarlar shu yerda</p>
+                            <span>Hali hech qanday xabar yo'q</span>
+                        </div>
                     </div>
 
-                    <div class="chat-input">
-                        <input type="text" id="messageInput" placeholder="Xabar yozing..." autofocus>
-                        <button id="sendBtn">📤 Yuborish</button>
+                    <!-- Input -->
+                    <div class="chat-input-area">
+                        <div class="input-wrapper">
+                            <input type="text" id="messageInput" placeholder="Xabar yozing..." autofocus>
+                            <button id="sendBtn" class="send-btn">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
 
-    <!-- PROFILE -->
-    <div id="profileSection" class="hidden">
-        <div class="container">
-            <div class="box">
-                <h1>👤 Profil</h1>
-                
-                <div class="profile-avatar" id="profileAvatar">👤</div>
-                <div class="profile-name" id="profileName">Ism</div>
-                <div class="profile-username" id="profileUsername">@username</div>
-                <div class="profile-bio" id="profileBio">Bio</div>
-
-                <div class="form-group">
-                    <label>📛 Ism</label>
-                    <input type="text" id="editName" placeholder="Ismingiz">
-                </div>
-                <div class="form-group">
-                    <label>📝 Bio</label>
-                    <input type="text" id="editBio" placeholder="O'zingiz haqingizda">
+    <!-- ============================================
+    PROFILE SECTION - ZAMONAVIY
+    ============================================ -->
+    <div id="profileSection" style="display:none;" class="profile-wrapper">
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="profile-back">
+                    <button id="backToChatBtn" class="back-btn">
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                        Ortga
+                    </button>
                 </div>
 
-                <button id="saveProfileBtn" class="btn">💾 Saqlash</button>
-                <button id="backToChatBtn" class="btn secondary">⬅️ Chatga qaytish</button>
+                <div class="profile-header">
+                    <div class="profile-avatar-large" id="profileAvatarLarge">👤</div>
+                    <h2 id="profileName">Ism</h2>
+                    <p class="profile-username" id="profileUsername">@username</p>
+                </div>
 
-                <div id="profileMessage" class="message"></div>
+                <div class="profile-bio-box">
+                    <p id="profileBio">Bio yo'q</p>
+                </div>
+
+                <div class="profile-form">
+                    <div class="input-group">
+                        <label>📛 Ism</label>
+                        <input type="text" id="editName" placeholder="Ismingizni kiriting">
+                    </div>
+                    <div class="input-group">
+                        <label>📝 Bio</label>
+                        <input type="text" id="editBio" placeholder="O'zingiz haqingizda">
+                    </div>
+                    <button id="saveProfileBtn" class="save-btn">
+                        💾 Saqlash
+                    </button>
+                </div>
+
+                <div id="profileMessage" class="profile-message"></div>
             </div>
         </div>
     </div>
@@ -143,61 +228,62 @@
         // ============================================
         function showMessage(el, text, type) {
             el.textContent = text;
-            el.className = 'message ' + (type || '');
+            el.className = 'auth-message ' + (type || '');
         }
 
         function showSection(section) {
-            [authSection, chatSection, profileSection].forEach(s => s.classList.add('hidden'));
-            section.classList.remove('hidden');
+            authSection.style.display = 'none';
+            chatSection.style.display = 'none';
+            profileSection.style.display = 'none';
+            section.style.display = '';
+            
+            // Animatsiya
+            section.style.animation = 'fadeInUp 0.4s ease';
         }
 
         // ============================================
-        // XABAR QO'SHISH - TUZATILGAN
+        // XABAR QO'SHISH
         // ============================================
         function appendMessage(msg) {
-            console.log('📝 appendMessage called with:', msg);
-            
             const container = document.getElementById('messagesContainer');
-            console.log('📦 Container found:', container ? 'Yes' : 'No');
+            if (!container) return;
             
-            if (!container) {
-                console.error('❌ messagesContainer not found!');
-                return;
-            }
+            // "Hali xabarlar yo'q" xabarini olib tashlash
+            const center = container.querySelector('.message-center');
+            if (center) center.remove();
             
             const div = document.createElement('div');
-            
             const isOwn = msg.userId === currentUser?.id || msg.user_id === currentUser?.id;
-            div.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            div.className = `message-bubble ${isOwn ? 'own' : 'other'}`;
             
             const time = msg.time || new Date(msg.created_at).toLocaleTimeString();
             const name = msg.name || msg.username || 'Unknown';
             
             div.innerHTML = `
-                <div class="msg-header">
-                    <strong>${isOwn ? 'Siz' : name}</strong>
-                    <span class="msg-time">${time}</span>
+                ${!isOwn ? `<div class="msg-avatar">${name.charAt(0).toUpperCase()}</div>` : ''}
+                <div class="msg-content">
+                    <div class="msg-meta">
+                        <span class="msg-name">${isOwn ? 'Siz' : name}</span>
+                        <span class="msg-time">${time}</span>
+                    </div>
+                    <div class="msg-text">${msg.message}</div>
                 </div>
-                <div class="msg-text">${msg.message}</div>
             `;
             
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-            
-            console.log('✅ Message appended to DOM');
         }
 
         function appendSystemMessage(text) {
-            console.log('💬 System message:', text);
-            
             const container = document.getElementById('messagesContainer');
-            if (!container) {
-                console.error('❌ messagesContainer not found!');
-                return;
-            }
+            if (!container) return;
+            
+            const center = container.querySelector('.message-center');
+            if (center) center.remove();
             
             const div = document.createElement('div');
-            div.className = 'message system';
+            div.className = 'message-system';
             div.textContent = text;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
@@ -213,10 +299,10 @@
             const password = $('regPassword').value;
 
             if (!username || username.length < 3) {
-                return showMessage(authMessage, 'Username min 3 chars', 'error');
+                return showMessage(authMessage, 'Username kamida 3 belgi', 'error');
             }
             if (!password || password.length < 4) {
-                return showMessage(authMessage, 'Password min 4 chars', 'error');
+                return showMessage(authMessage, 'Parol kamida 4 belgi', 'error');
             }
 
             try {
@@ -247,7 +333,7 @@
             const password = $('loginPassword').value;
 
             if (!username || !password) {
-                return showMessage(authMessage, 'Username va password kerak', 'error');
+                return showMessage(authMessage, 'Username va parol kerak', 'error');
             }
 
             try {
@@ -283,7 +369,9 @@
             }
 
             showSection(chatSection);
-            $('chatUsername').textContent = '@' + currentUser.username;
+            $('chatUsername').textContent = currentUser.name || currentUser.username;
+            $('userAvatar').textContent = currentUser.avatar || '👤';
+            $('currentRoomName').textContent = currentRoom;
 
             if (socket) {
                 socket.disconnect();
@@ -306,9 +394,6 @@
             });
 
             socket.on('new_message', (msg) => {
-                console.log('📩 New message received:', msg);
-                console.log('📩 Message text:', msg.message);
-                console.log('📩 From:', msg.username);
                 appendMessage(msg);
             });
 
@@ -316,39 +401,32 @@
                 appendSystemMessage(data.text);
             });
 
-            socket.on('error_message', (data) => {
-                console.error('❌ Server error:', data.text);
-                appendSystemMessage('❌ ' + data.text);
-            });
-
             loadMessages(currentRoom);
         }
 
         async function loadMessages(room) {
             try {
-                console.log(`📥 Loading messages for room: ${room}`);
                 const res = await fetch(`/api/messages/${room}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                if (!res.ok) {
-                    console.error('❌ Failed to load messages:', res.status);
-                    return;
-                }
-                
                 const messages = await res.json();
-                console.log(`📥 Loaded ${messages.length} messages`);
                 
                 const container = document.getElementById('messagesContainer');
                 container.innerHTML = '';
                 
                 if (messages.length === 0) {
-                    appendSystemMessage('💬 Hozircha xabarlar yo\'q');
+                    container.innerHTML = `
+                        <div class="message-center">
+                            <div class="message-center-icon">💬</div>
+                            <p>Xabarlar shu yerda</p>
+                            <span>Hali hech qanday xabar yo'q</span>
+                        </div>
+                    `;
                 } else {
                     messages.forEach(msg => appendMessage(msg));
                 }
             } catch (error) {
-                console.error('❌ Load messages error:', error);
+                console.error('Load messages error:', error);
             }
         }
 
@@ -356,43 +434,18 @@
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             
-            console.log('📤 sendMessage called');
-            console.log('📝 Input text:', text);
-            
-            if (!text) {
-                console.warn('⚠️ Xabar bo\'sh');
-                return;
-            }
-            
+            if (!text) return;
             if (!socket || !socket.connected) {
-                console.error('❌ Socket not connected!');
                 appendSystemMessage('⚠️ Serverga ulanish yo\'q!');
                 return;
             }
 
-            console.log(`📤 Sending message: "${text}" to room: ${currentRoom}`);
-            
             socket.emit('send_message', {
                 room: currentRoom,
                 message: text
             });
 
-            // O'z xabarini darhol ekranga qo'shish
-            const tempMsg = {
-                id: Date.now(),
-                userId: currentUser.id,
-                username: currentUser.username,
-                name: currentUser.name || currentUser.username,
-                message: text,
-                time: new Date().toLocaleTimeString(),
-                created_at: new Date().toISOString()
-            };
-            
-            console.log('📝 Adding own message:', tempMsg);
-            appendMessage(tempMsg);
-
             input.value = '';
-            console.log('✅ Message sent!');
         }
 
         // ============================================
@@ -405,7 +458,7 @@
                 });
                 const user = await res.json();
                 
-                $('profileAvatar').textContent = user.avatar || '👤';
+                $('profileAvatarLarge').textContent = user.avatar || '👤';
                 $('profileName').textContent = user.name || user.username;
                 $('profileUsername').textContent = '@' + user.username;
                 $('profileBio').textContent = user.bio || 'Bio yo\'q';
@@ -419,8 +472,8 @@
         }
 
         async function saveProfile() {
-            const name = $('editName').value.trim();
-            const bio = $('editBio').value.trim();
+            const name = document.getElementById('editName').value.trim();
+            const bio = document.getElementById('editBio').value.trim();
 
             try {
                 const res = await fetch('/api/profile', {
@@ -434,16 +487,16 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    showMessage($('profileMessage'), '✅ Saqlandi!', 'success');
+                    showMessage(document.getElementById('profileMessage'), '✅ Saqlandi!', 'success');
                     currentUser.name = name;
                     currentUser.bio = bio;
                     localStorage.setItem('user', JSON.stringify(currentUser));
                     setTimeout(() => showSection(chatSection), 500);
                 } else {
-                    showMessage($('profileMessage'), data.error || 'Xatolik', 'error');
+                    showMessage(document.getElementById('profileMessage'), data.error || 'Xatolik', 'error');
                 }
             } catch {
-                showMessage($('profileMessage'), 'Server xatosi', 'error');
+                showMessage(document.getElementById('profileMessage'), 'Server xatosi', 'error');
             }
         }
 
@@ -465,67 +518,60 @@
         // ============================================
         // EVENT LISTENERS
         // ============================================
-
-        $('loginForm').addEventListener('submit', (e) => { e.preventDefault(); login(); });
-        $('registerForm').addEventListener('submit', (e) => { e.preventDefault(); register(); });
+        document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); login(); });
+        document.getElementById('registerForm').addEventListener('submit', (e) => { e.preventDefault(); register(); });
         
-        $('loginTab').addEventListener('click', () => {
-            $('loginTab').classList.add('active');
-            $('registerTab').classList.remove('active');
-            $('loginForm').classList.remove('hidden');
-            $('registerForm').classList.add('hidden');
-            authMessage.className = 'message';
+        document.getElementById('loginTab').addEventListener('click', () => {
+            document.getElementById('loginTab').classList.add('active');
+            document.getElementById('registerTab').classList.remove('active');
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('registerForm').classList.remove('active');
+            document.querySelector('.tab-slider').style.transform = 'translateX(0)';
+            document.getElementById('authMessage').className = 'auth-message';
         });
         
-        $('registerTab').addEventListener('click', () => {
-            $('registerTab').classList.add('active');
-            $('loginTab').classList.remove('active');
-            $('registerForm').classList.remove('hidden');
-            $('loginForm').classList.add('hidden');
-            authMessage.className = 'message';
+        document.getElementById('registerTab').addEventListener('click', () => {
+            document.getElementById('registerTab').classList.add('active');
+            document.getElementById('loginTab').classList.remove('active');
+            document.getElementById('registerForm').classList.add('active');
+            document.getElementById('loginForm').classList.remove('active');
+            document.querySelector('.tab-slider').style.transform = 'translateX(100%)';
+            document.getElementById('authMessage').className = 'auth-message';
         });
 
-        $('sendBtn').addEventListener('click', sendMessage);
-        $('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-            }
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
 
-        document.querySelectorAll('.room-btn').forEach(btn => {
+        document.querySelectorAll('.room-item').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.room-item').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                
-                const newRoom = this.dataset.room;
-                console.log(`🔄 Switched to room: ${newRoom}`);
-                currentRoom = newRoom;
+                currentRoom = this.dataset.room;
+                document.getElementById('currentRoomName').textContent = currentRoom;
                 
                 if (socket && socket.connected) {
                     socket.emit('join_room', currentRoom);
                 }
-                
                 loadMessages(currentRoom);
             });
         });
 
-        $('profileBtn').addEventListener('click', loadProfile);
-        $('saveProfileBtn').addEventListener('click', saveProfile);
-        $('backToChatBtn').addEventListener('click', () => showSection(chatSection));
-        $('logoutBtn').addEventListener('click', logout);
+        document.getElementById('profileBtn').addEventListener('click', loadProfile);
+        document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+        document.getElementById('backToChatBtn').addEventListener('click', () => showSection(chatSection));
+        document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // ============================================
         // INIT
         // ============================================
         console.log('💬 ChatHub loaded');
-        console.log('🔐 Token:', token ? 'Yes' : 'No');
         
         if (token) {
             const savedUser = localStorage.getItem('user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
-                console.log('👤 User:', currentUser);
                 initChat();
             } else {
                 showSection(authSection);
