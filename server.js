@@ -46,7 +46,6 @@ const verifyToken = (req, res, next) => {
 // AUTH API
 // ============================================
 
-// Register
 app.post('/api/register', async (req, res) => {
     try {
         const { username, password, name, bio } = req.body;
@@ -78,7 +77,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Login
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -119,7 +117,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Get profile
 app.get('/api/profile', verifyToken, async (req, res) => {
     try {
         const user = await db.getUserById(req.user.id);
@@ -132,7 +129,6 @@ app.get('/api/profile', verifyToken, async (req, res) => {
     }
 });
 
-// Update profile
 app.put('/api/profile', verifyToken, async (req, res) => {
     try {
         const { name, bio, avatar } = req.body;
@@ -143,7 +139,6 @@ app.put('/api/profile', verifyToken, async (req, res) => {
     }
 });
 
-// Get messages
 app.get('/api/messages/:room', verifyToken, async (req, res) => {
     try {
         const messages = await db.getMessages(req.params.room);
@@ -154,7 +149,7 @@ app.get('/api/messages/:room', verifyToken, async (req, res) => {
 });
 
 // ============================================
-// SOCKET.IO - TUZATILGAN
+// SOCKET.IO
 // ============================================
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -176,23 +171,31 @@ io.on('connection', (socket) => {
     // Xonaga qo'shilish
     socket.on('join_room', (room) => {
         const roomName = room || 'general';
-        socket.join(roomName);
-        console.log(`📡 ${socket.username} joined room: ${roomName}`);
         
-        // Xush kelibsiz xabari
+        if (socket.room) {
+            socket.leave(socket.room);
+        }
+        
+        socket.join(roomName);
+        socket.room = roomName;
+        
+        console.log(`📡 ${socket.username} joined room: ${roomName}`);
+        console.log(`📡 Users in ${roomName}: ${io.sockets.adapter.rooms.get(roomName)?.size || 0}`);
+        
         socket.emit('system_message', {
-            text: `💬 Xush kelibsiz, ${socket.username}!`,
+            text: `💬 Xush kelibsiz, ${socket.username}! (${roomName})`,
             time: new Date().toLocaleTimeString()
         });
     });
 
-    // Xabar yuborish - TUZATILGAN
+    // Xabar yuborish
     socket.on('send_message', async (data) => {
         try {
             const { room, message } = data;
             const roomName = room || 'general';
             
             console.log(`📩 ${socket.username} -> ${roomName}: ${message}`);
+            console.log(`📡 Users in ${roomName}: ${io.sockets.adapter.rooms.get(roomName)?.size || 0}`);
 
             // Bazaga saqlash
             await db.saveMessage(roomName, socket.userId, message);
@@ -211,8 +214,7 @@ io.on('connection', (socket) => {
             // Xonadagi HAMMAGA yuborish (o'zi + boshqalar)
             io.to(roomName).emit('new_message', messageData);
             
-            // Debug uchun
-            console.log(`✅ Message sent to room: ${roomName}`);
+            console.log(`✅ Message sent to ${roomName} (${io.sockets.adapter.rooms.get(roomName)?.size || 0} users)`);
 
         } catch (error) {
             console.error('Message error:', error);
@@ -229,7 +231,6 @@ io.on('connection', (socket) => {
         console.log(`👋 ${socket.username} left room: ${roomName}`);
     });
 
-    // Uzilish
     socket.on('disconnect', () => {
         console.log(`👋 ${socket.username} disconnected`);
     });
