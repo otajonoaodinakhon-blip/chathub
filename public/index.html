@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatHub</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- ========================================= -->
+    <!-- AUTH SECTION -->
+    <!-- ========================================= -->
+    <div id="authSection" class="container">
+        <div class="box">
+            <h1>💬 ChatHub</h1>
+            <p class="subtitle">Xush kelibsiz!</p>
+
+            <div class="tabs">
+                <button id="loginTab" class="active">Kirish</button>
+                <button id="registerTab">Ro'yxatdan o'tish</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>👤 Username</label>
+                    <input type="text" id="loginUsername" placeholder="username" required>
+                </div>
+                <div class="form-group">
+                    <label>🔑 Password</label>
+                    <input type="password" id="loginPassword" placeholder="password" required>
+                </div>
+                <button type="submit" class="btn">Kirish</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label>👤 Username</label>
+                    <input type="text" id="regUsername" placeholder="username" required>
+                </div>
+                <div class="form-group">
+                    <label>📛 Name</label>
+                    <input type="text" id="regName" placeholder="Ismingiz">
+                </div>
+                <div class="form-group">
+                    <label>📝 Bio</label>
+                    <input type="text" id="regBio" placeholder="O'zingiz haqingizda">
+                </div>
+                <div class="form-group">
+                    <label>🔑 Password</label>
+                    <input type="password" id="regPassword" placeholder="password" required>
+                </div>
+                <button type="submit" class="btn">Ro'yxatdan o'tish</button>
+            </form>
+
+            <div id="authMessage" class="message"></div>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- CHAT SECTION -->
+    <!-- ========================================= -->
+    <div id="chatSection" class="hidden">
+        <div class="chat-container">
+            <header class="chat-header">
+                <h2>💬 ChatHub</h2>
+                <div class="header-actions">
+                    <button id="profileBtn" class="icon-btn">👤</button>
+                    <button id="logoutBtn" class="icon-btn">🚪</button>
+                </div>
+            </header>
+
+            <div class="chat-main">
+                <aside class="sidebar">
+                    <div class="user-info">
+                        <span id="chatUsername">@user</span>
+                    </div>
+                    <div class="room-list">
+                        <button class="room-btn active" data-room="general"># general</button>
+                        <button class="room-btn" data-room="random"># random</button>
+                        <button class="room-btn" data-room="help"># help</button>
+                    </div>
+                </aside>
+
+                <main class="chat-area">
+                    <div class="chat-messages" id="messagesContainer">
+                        <div class="message system">💬 Xabarlar shu yerda</div>
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Xabar yozing...">
+                        <button id="sendBtn">📤</button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- PROFILE SECTION -->
+    <!-- ========================================= -->
+    <div id="profileSection" class="hidden">
+        <div class="container">
+            <div class="box">
+                <h1>👤 Profil</h1>
+                
+                <div class="profile-avatar" id="profileAvatar">👤</div>
+                <div class="profile-name" id="profileName">Ism</div>
+                <div class="profile-username" id="profileUsername">@username</div>
+                <div class="profile-bio" id="profileBio">Bio</div>
+
+                <div class="form-group">
+                    <label>📛 Ism</label>
+                    <input type="text" id="editName" placeholder="Ismingiz">
+                </div>
+                <div class="form-group">
+                    <label>📝 Bio</label>
+                    <input type="text" id="editBio" placeholder="O'zingiz haqingizda">
+                </div>
+
+                <button id="saveProfileBtn" class="btn">💾 Saqlash</button>
+                <button id="backToChatBtn" class="btn secondary">⬅️ Chatga qaytish</button>
+
+                <div id="profileMessage" class="message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let currentUser = null;
+        let currentRoom = 'general';
+        let socket = null;
+        let token = localStorage.getItem('token');
+
+        // ============================================
+        // DOM REFS
+        // ============================================
+        const $ = (id) => document.getElementById(id);
+        const authSection = $('authSection');
+        const chatSection = $('chatSection');
+        const profileSection = $('profileSection');
+        const authMessage = $('authMessage');
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        function showMessage(el, text, type) {
+            el.textContent = text;
+            el.className = 'message ' + (type || '');
+        }
+
+        function showSection(section) {
+            [authSection, chatSection, profileSection].forEach(s => s.classList.add('hidden'));
+            section.classList.remove('hidden');
+        }
+
+        // ============================================
+        // AUTH
+        // ============================================
+        async function register() {
+            const username = $('regUsername').value.trim();
+            const name = $('regName').value.trim();
+            const bio = $('regBio').value.trim();
+            const password = $('regPassword').value;
+
+            if (!username || username.length < 3) {
+                return showMessage(authMessage, 'Username min 3 chars', 'error');
+            }
+            if (!password || password.length < 4) {
+                return showMessage(authMessage, 'Password min 4 chars', 'error');
+            }
+
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, name, bio })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showMessage(authMessage, '✅ Ro\'yxatdan o\'tdingiz!', 'success');
+                    setTimeout(initChat, 500);
+                } else {
+                    showMessage(authMessage, data.error || 'Xatolik', 'error');
+                }
+            } catch {
+                showMessage(authMessage, 'Server xatosi', 'error');
+            }
+        }
+
+        async function login() {
+            const username = $('loginUsername').value.trim();
+            const password = $('loginPassword').value;
+
+            if (!username || !password) {
+                return showMessage(authMessage, 'Username va password kerak', 'error');
+            }
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showMessage(authMessage, '✅ Xush kelibsiz!', 'success');
+                    setTimeout(initChat, 500);
+                } else {
+                    showMessage(authMessage, data.error || 'Xatolik', 'error');
+                }
+            } catch {
+                showMessage(authMessage, 'Server xatosi', 'error');
+            }
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        function initChat() {
+            if (!token || !currentUser) {
+                showSection(authSection);
+                return;
+            }
+
+            showSection(chatSection);
+            $('chatUsername').textContent = '@' + currentUser.username;
+
+            // Connect socket
+            if (socket) socket.disconnect();
+            socket = io({
+                auth: { token }
+            });
+
+            socket.on('connect', () => {
+                socket.emit('join_room', currentRoom);
+            });
+
+            socket.on('new_message', (msg) => {
+                appendMessage(msg);
+            });
+
+            // Load messages
+            loadMessages(currentRoom);
+        }
+
+        async function loadMessages(room) {
+            try {
+                const res = await fetch(`/api/messages/${room}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const messages = await res.json();
+                
+                const container = $('messagesContainer');
+                container.innerHTML = '';
+                messages.forEach(msg => appendMessage(msg));
+            } catch {
+                // ignore
+            }
+        }
+
+        function appendMessage(msg) {
+            const container = $('messagesContainer');
+            const div = document.createElement('div');
+            
+            const isOwn = msg.user_id === currentUser?.id;
+            div.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            div.innerHTML = `
+                <div class="msg-header">
+                    <strong>${msg.name || msg.username}</strong>
+                    <span class="msg-time">${new Date(msg.created_at).toLocaleTimeString()}</span>
+                </div>
+                <div class="msg-text">${msg.message}</div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = $('messageInput');
+            const text = input.value.trim();
+            if (!text || !socket) return;
+
+            socket.emit('send_message', {
+                room: currentRoom,
+                message: text
+            });
+
+            input.value = '';
+        }
+
+        // ============================================
+        // PROFILE
+        // ============================================
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const user = await res.json();
+                
+                $('profileAvatar').textContent = user.avatar || '👤';
+                $('profileName').textContent = user.name || user.username;
+                $('profileUsername').textContent = '@' + user.username;
+                $('profileBio').textContent = user.bio || 'Bio yo\'q';
+                $('editName').value = user.name || '';
+                $('editBio').value = user.bio || '';
+                
+                showSection(profileSection);
+            } catch {
+                showMessage($('profileMessage'), 'Xatolik', 'error');
+            }
+        }
+
+        async function saveProfile() {
+            const name = $('editName').value.trim();
+            const bio = $('editBio').value.trim();
+
+            try {
+                const res = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, bio })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage($('profileMessage'), '✅ Saqlandi!', 'success');
+                    currentUser.name = name;
+                    currentUser.bio = bio;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    setTimeout(() => showSection(chatSection), 500);
+                } else {
+                    showMessage($('profileMessage'), data.error || 'Xatolik', 'error');
+                }
+            } catch {
+                showMessage($('profileMessage'), 'Server xatosi', 'error');
+            }
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            if (socket) socket.disconnect();
+            socket = null;
+            token = null;
+            currentUser = null;
+            showSection(authSection);
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        // Auth
+        $('loginForm').addEventListener('submit', (e) => { e.preventDefault(); login(); });
+        $('registerForm').addEventListener('submit', (e) => { e.preventDefault(); register(); });
+        
+        $('loginTab').addEventListener('click', () => {
+            $('loginTab').classList.add('active');
+            $('registerTab').classList.remove('active');
+            $('loginForm').classList.remove('hidden');
+            $('registerForm').classList.add('hidden');
+            authMessage.className = 'message';
+        });
+        
+        $('registerTab').addEventListener('click', () => {
+            $('registerTab').classList.add('active');
+            $('loginTab').classList.remove('active');
+            $('registerForm').classList.remove('hidden');
+            $('loginForm').classList.add('hidden');
+            authMessage.className = 'message';
+        });
+
+        // Chat
+        $('sendBtn').addEventListener('click', sendMessage);
+        $('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Room buttons
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRoom = btn.dataset.room;
+                if (socket) {
+                    socket.emit('join_room', currentRoom);
+                }
+                loadMessages(currentRoom);
+            });
+        });
+
+        // Profile
+        $('profileBtn').addEventListener('click', loadProfile);
+        $('saveProfileBtn').addEventListener('click', saveProfile);
+        $('backToChatBtn').addEventListener('click', () => showSection(chatSection));
+
+        // Logout
+        $('logoutBtn').addEventListener('click', logout);
+
+        // ============================================
+        // INIT
+        // ============================================
+        if (token) {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                initChat();
+            } else {
+                showSection(authSection);
+            }
+        } else {
+            showSection(authSection);
+        }
+
+        console.log('💬 ChatHub loaded');
+        console.log('🔐 Token:', token ? 'Yes' : 'No');
+    </script>
+</body>
+</html>
