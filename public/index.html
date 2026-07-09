@@ -230,7 +230,7 @@
         }
 
         // ============================================
-        // CHAT
+        // CHAT - TUZATILGAN
         // ============================================
         function initChat() {
             if (!token || !currentUser) {
@@ -241,21 +241,42 @@
             showSection(chatSection);
             $('chatUsername').textContent = '@' + currentUser.username;
 
-            // Connect socket
-            if (socket) socket.disconnect();
+            // Socket ulanish
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+
             socket = io({
                 auth: { token }
             });
 
             socket.on('connect', () => {
+                console.log('✅ Socket connected');
                 socket.emit('join_room', currentRoom);
             });
 
+            socket.on('connect_error', (error) => {
+                console.error('Socket error:', error);
+            });
+
+            // Yangi xabar kelganda - TUZATILGAN
             socket.on('new_message', (msg) => {
+                console.log('📩 New message:', msg);
                 appendMessage(msg);
             });
 
-            // Load messages
+            // System xabar
+            socket.on('system_message', (data) => {
+                appendSystemMessage(data.text);
+            });
+
+            // Xatolik
+            socket.on('error_message', (data) => {
+                console.error('Server error:', data.text);
+            });
+
+            // Xabarlarni yuklash
             loadMessages(currentRoom);
         }
 
@@ -268,9 +289,14 @@
                 
                 const container = $('messagesContainer');
                 container.innerHTML = '';
-                messages.forEach(msg => appendMessage(msg));
-            } catch {
-                // ignore
+                
+                if (messages.length === 0) {
+                    appendSystemMessage('💬 Hozircha xabarlar yo\'q');
+                } else {
+                    messages.forEach(msg => appendMessage(msg));
+                }
+            } catch (error) {
+                console.error('Load messages error:', error);
             }
         }
 
@@ -281,10 +307,12 @@
             const isOwn = msg.user_id === currentUser?.id;
             div.className = `message ${isOwn ? 'own' : 'other'}`;
             
+            const time = msg.time || new Date(msg.created_at).toLocaleTimeString();
+            
             div.innerHTML = `
                 <div class="msg-header">
                     <strong>${msg.name || msg.username}</strong>
-                    <span class="msg-time">${new Date(msg.created_at).toLocaleTimeString()}</span>
+                    <span class="msg-time">${time}</span>
                 </div>
                 <div class="msg-text">${msg.message}</div>
             `;
@@ -293,11 +321,27 @@
             container.scrollTop = container.scrollHeight;
         }
 
+        function appendSystemMessage(text) {
+            const container = $('messagesContainer');
+            const div = document.createElement('div');
+            div.className = 'message system';
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
         function sendMessage() {
             const input = $('messageInput');
             const text = input.value.trim();
-            if (!text || !socket) return;
+            
+            if (!text) return;
+            if (!socket || !socket.connected) {
+                appendSystemMessage('⚠️ Serverga ulanish yo\'q');
+                return;
+            }
 
+            console.log(`📤 Sending message: "${text}" to room: ${currentRoom}`);
+            
             socket.emit('send_message', {
                 room: currentRoom,
                 message: text
@@ -364,8 +408,10 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            if (socket) socket.disconnect();
-            socket = null;
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
             token = null;
             currentUser = null;
             showSection(authSection);
@@ -407,10 +453,13 @@
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentRoom = btn.dataset.room;
-                if (socket) {
+                
+                if (socket && socket.connected) {
                     socket.emit('join_room', currentRoom);
                 }
+                
                 loadMessages(currentRoom);
+                console.log(`🔄 Switched to room: ${currentRoom}`);
             });
         });
 
@@ -439,6 +488,7 @@
 
         console.log('💬 ChatHub loaded');
         console.log('🔐 Token:', token ? 'Yes' : 'No');
+        console.log('👤 User:', currentUser);
     </script>
 </body>
 </html>
