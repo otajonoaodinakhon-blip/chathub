@@ -80,12 +80,12 @@
 
                 <main class="chat-area">
                     <div class="chat-messages" id="messagesContainer">
-                        <div class="message system">💬 Xabarlar shu yerda</div>
+                        <!-- Xabarlar shu yerga qo'shiladi -->
                     </div>
 
                     <div class="chat-input">
-                        <input type="text" id="messageInput" placeholder="Xabar yozing...">
-                        <button id="sendBtn">📤</button>
+                        <input type="text" id="messageInput" placeholder="Xabar yozing..." autofocus>
+                        <button id="sendBtn">📤 Yuborish</button>
                     </div>
                 </main>
             </div>
@@ -151,17 +151,20 @@
             section.classList.remove('hidden');
         }
 
-        function appendSystemMessage(text) {
-            const container = $('messagesContainer');
-            const div = document.createElement('div');
-            div.className = 'message system';
-            div.textContent = text;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
+        // ============================================
+        // XABAR QO'SHISH - TUZATILGAN
+        // ============================================
         function appendMessage(msg) {
-            const container = $('messagesContainer');
+            console.log('📝 appendMessage called with:', msg);
+            
+            const container = document.getElementById('messagesContainer');
+            console.log('📦 Container found:', container ? 'Yes' : 'No');
+            
+            if (!container) {
+                console.error('❌ messagesContainer not found!');
+                return;
+            }
+            
             const div = document.createElement('div');
             
             const isOwn = msg.userId === currentUser?.id || msg.user_id === currentUser?.id;
@@ -178,6 +181,24 @@
                 <div class="msg-text">${msg.message}</div>
             `;
             
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            
+            console.log('✅ Message appended to DOM');
+        }
+
+        function appendSystemMessage(text) {
+            console.log('💬 System message:', text);
+            
+            const container = document.getElementById('messagesContainer');
+            if (!container) {
+                console.error('❌ messagesContainer not found!');
+                return;
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'message system';
+            div.textContent = text;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
@@ -285,7 +306,9 @@
             });
 
             socket.on('new_message', (msg) => {
-                console.log('📩 New message:', msg);
+                console.log('📩 New message received:', msg);
+                console.log('📩 Message text:', msg.message);
+                console.log('📩 From:', msg.username);
                 appendMessage(msg);
             });
 
@@ -303,12 +326,20 @@
 
         async function loadMessages(room) {
             try {
+                console.log(`📥 Loading messages for room: ${room}`);
                 const res = await fetch(`/api/messages/${room}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const messages = await res.json();
                 
-                const container = $('messagesContainer');
+                if (!res.ok) {
+                    console.error('❌ Failed to load messages:', res.status);
+                    return;
+                }
+                
+                const messages = await res.json();
+                console.log(`📥 Loaded ${messages.length} messages`);
+                
+                const container = document.getElementById('messagesContainer');
                 container.innerHTML = '';
                 
                 if (messages.length === 0) {
@@ -317,13 +348,16 @@
                     messages.forEach(msg => appendMessage(msg));
                 }
             } catch (error) {
-                console.error('Load messages error:', error);
+                console.error('❌ Load messages error:', error);
             }
         }
 
         function sendMessage() {
-            const input = $('messageInput');
+            const input = document.getElementById('messageInput');
             const text = input.value.trim();
+            
+            console.log('📤 sendMessage called');
+            console.log('📝 Input text:', text);
             
             if (!text) {
                 console.warn('⚠️ Xabar bo\'sh');
@@ -343,7 +377,22 @@
                 message: text
             });
 
+            // O'z xabarini darhol ekranga qo'shish
+            const tempMsg = {
+                id: Date.now(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                name: currentUser.name || currentUser.username,
+                message: text,
+                time: new Date().toLocaleTimeString(),
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('📝 Adding own message:', tempMsg);
+            appendMessage(tempMsg);
+
             input.value = '';
+            console.log('✅ Message sent!');
         }
 
         // ============================================
@@ -417,7 +466,6 @@
         // EVENT LISTENERS
         // ============================================
 
-        // Auth
         $('loginForm').addEventListener('submit', (e) => { e.preventDefault(); login(); });
         $('registerForm').addEventListener('submit', (e) => { e.preventDefault(); register(); });
         
@@ -437,7 +485,6 @@
             authMessage.className = 'message';
         });
 
-        // Chat
         $('sendBtn').addEventListener('click', sendMessage);
         $('messageInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -446,7 +493,6 @@
             }
         });
 
-        // Room buttons
         document.querySelectorAll('.room-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
@@ -464,12 +510,9 @@
             });
         });
 
-        // Profile
         $('profileBtn').addEventListener('click', loadProfile);
         $('saveProfileBtn').addEventListener('click', saveProfile);
         $('backToChatBtn').addEventListener('click', () => showSection(chatSection));
-
-        // Logout
         $('logoutBtn').addEventListener('click', logout);
 
         // ============================================
